@@ -2,13 +2,17 @@ import React, { useState, useEffect } from 'react'
 import Navbar from '../Navbar/Navbar'
 import './HeroSection.css'
 
-import banner1 from './Masion-Banner-slider.jpg'
-import banner2 from './banner.jpg'
+import banner1 from '../../assets/maison-banners/1.png'
+import banner2 from '../../assets/maison-banners/2.png'
+import banner3 from '../../assets/maison-banners/3.png'
+import banner4 from '../../assets/maison-banners/4.png'
 
 
 const bannerSlides = [
-  { image: banner1, alt: 'Banner 1' },
-  { image: banner2, alt: 'Banner 2' },
+  { image: banner1, alt: 'Velvet Edit — coming soon' },
+  { image: banner2, alt: 'Elegance in Silk' },
+  { image: banner3, alt: 'Formal Edit — 2 Pc & 3 Pc' },
+  { image: banner4, alt: 'Co-ord Set Edit' },
 ]
 
 function HeroSection() {

@@ -48,6 +48,7 @@
   align-items: center;
   justify-content: center;
   transition: background 0.2s ease;
+  display: none;
 }
 
 .hero-carousel-control:hover {
@@ -56,14 +57,10 @@
 
 .hero-carousel-prev {
   left: 20px;
-  display: none;
-
 }
 
 .hero-carousel-next {
   right: 20px;
-  display: none;
-
 }
 
 /* ---------- Dots ---------- */
@@ -72,7 +69,7 @@
   bottom: 24px;
   left: 50%;
   transform: translateX(-50%);
-  display: none;
+  display: flex;
   z-index: 10;
   gap: 10px;
 }
@@ -200,7 +197,13 @@
   .hero-carousel-control {
     width: 32px;
     height: 32px;
+  }
+
+  .hero-carousel-prev {
     left: 10px;
+  }
+
+  .hero-carousel-next {
     right: 10px;
   }
 }

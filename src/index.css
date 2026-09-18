@@ -38,6 +38,7 @@ body {
   font-family: var(--theme-font);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  padding-top: 60px;
 }
 
 /* Custom Scrollbar */
