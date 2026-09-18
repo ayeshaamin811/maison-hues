@@ -7,9 +7,7 @@ import products from "../../data/products";
 
 import "./CollectionPage.css";
 
-// categoryName (URL se aane wala) → title ke 3 hisse.
-// "italic" wala hissa styling mein tilted (italic) show hoga.
-// Naya collection add karna ho tou bas yahan ek entry add karni hai.
+
 const categoryTitles = {
   casual: { prefix: "Our", italic: "Casual", suffix: "Collections" },
   solids: { prefix: "Our", italic: "Solids", suffix: "Collection" },
