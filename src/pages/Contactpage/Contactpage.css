@@ -98,29 +98,6 @@
   min-height: 100px;
 }
 
-/* ===== Checkboxes ===== */
-.checkbox-row {
-  display: flex;
-  gap: 24px;
-}
-
-.checkbox-label {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 13px;
-  font-weight: 600;
-  letter-spacing: 0.5px;
-  text-transform: uppercase;
-  cursor: pointer;
-}
-
-.checkbox-label input[type="checkbox"] {
-  width: 16px;
-  height: 16px;
-  cursor: pointer;
-}
-
 /* ===== Submit button ===== */
 .send-btn {
   background-color: #111111;
@@ -144,6 +121,46 @@
   transform: scale(0.98);
 }
 
+/* ===== Form feedback ===== */
+/* Form-level notice: the 201 message, a 429 throttle notice, or a failed request. */
+.form-banner {
+  margin: 0 0 4px;
+  padding: 12px 14px;
+  font-size: 14px;
+  border-radius: 6px;
+  border: 1px solid transparent;
+}
+
+.form-banner--success {
+  color: #166534;
+  background-color: #f0fdf4;
+  border-color: #bbf7d0;
+}
+
+.form-banner--error {
+  color: #991b1b;
+  background-color: #fef2f2;
+  border-color: #fecaca;
+}
+
+/* Per-field message from a 400, sits under its own input. */
+.field-error {
+  margin: 6px 0 0;
+  font-size: 12px;
+  color: #b91c1c;
+}
+
+.form-group input[aria-invalid="true"],
+.form-group textarea[aria-invalid="true"] {
+  border-color: #b91c1c;
+}
+
+/* Submit is disabled while a request is in flight. */
+.contact-form button[disabled] {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 /* ===== Responsive design (media queries only) ===== */
 @media (max-width: 600px) {
   .contact-page {
@@ -161,11 +178,6 @@
   .form-row {
     flex-direction: column;
     gap: 0;
-  }
-
-  .checkbox-row {
-    gap: 16px;
-    flex-wrap: wrap;
   }
 
   .send-btn {

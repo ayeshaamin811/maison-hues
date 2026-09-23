@@ -6,8 +6,12 @@ import { Navigation } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/navigation";
 
-// Product data (ab centralized file se aa raha hai)
-import products from "../../data/products";
+// Product data ab Django API se aa raha hai
+import useProducts from "../../hooks/useProducts";
+import {
+  CardSkeleton,
+  ErrorState,
+} from "../ProductStates/ProductStates";
 
 // Our own custom CSS (colors, fonts, hover effects, media queries)
 import "./Solidscollection.css";
@@ -112,8 +116,14 @@ export default function SolidsCollection() {
   const nextRef = useRef(null);
   const navigate = useNavigate();
 
-  // Centralized data se sirf "solids" category ke products nikalna
-const solidProducts = products.filter((p) => p.category.includes("solids"));
+  // Sirf "solids" collection ke products — filter ab server par hota hai.
+  const {
+    products: solidProducts,
+    loading,
+    error,
+    retry,
+  } = useProducts({ collection: "solids", page_size: 96 });
+
   const handleCardClick = (id) => {
     navigate(`/product/${id}`);
   };
@@ -152,32 +162,45 @@ const solidProducts = products.filter((p) => p.category.includes("solids"));
         </div>
 
         {/* Swiper slider showing all product cards */}
-        <Swiper
-          modules={[Navigation]}
-          spaceBetween={0}
-          slidesPerView={4}
-          onBeforeInit={(swiper) => {
-            swiper.params.navigation.prevEl = prevRef.current;
-            swiper.params.navigation.nextEl = nextRef.current;
-          }}
-          navigation={{
-            prevEl: prevRef.current,
-            nextEl: nextRef.current,
-          }}
-          breakpoints={{
-            0: { slidesPerView: 1, spaceBetween: 0 },
-            640: { slidesPerView: 2, spaceBetween: 0 },
-            1024: { slidesPerView: 3, spaceBetween: 0 },
-            1280: { slidesPerView: 4, spaceBetween: 0 },
-          }}
-          className="sld-swiper"
-        >
-          {solidProducts.map((product) => (
-            <SwiperSlide key={product.id}>
-              <ProductCard product={product} onCardClick={handleCardClick} />
-            </SwiperSlide>
-          ))}
-        </Swiper>
+        {error ? (
+          <ErrorState onRetry={retry} />
+        ) : (
+          <Swiper
+            modules={[Navigation]}
+            spaceBetween={0}
+            slidesPerView={4}
+            onBeforeInit={(swiper) => {
+              swiper.params.navigation.prevEl = prevRef.current;
+              swiper.params.navigation.nextEl = nextRef.current;
+            }}
+            navigation={{
+              prevEl: prevRef.current,
+              nextEl: nextRef.current,
+            }}
+            breakpoints={{
+              0: { slidesPerView: 1, spaceBetween: 0 },
+              640: { slidesPerView: 2, spaceBetween: 0 },
+              1024: { slidesPerView: 3, spaceBetween: 0 },
+              1280: { slidesPerView: 4, spaceBetween: 0 },
+            }}
+            className="sld-swiper"
+            // Skeleton se asli slides par jaate waqt Swiper ko dobara
+            // init karwata hai, warna slide count aur arrows stale reh sakte hain.
+            key={loading ? "loading" : "loaded"}
+          >
+            {loading
+              ? Array.from({ length: 4 }, (_, index) => (
+                  <SwiperSlide key={`skeleton-${index}`}>
+                    <CardSkeleton />
+                  </SwiperSlide>
+                ))
+              : solidProducts.map((product) => (
+                  <SwiperSlide key={product.id}>
+                    <ProductCard product={product} onCardClick={handleCardClick} />
+                  </SwiperSlide>
+                ))}
+          </Swiper>
+        )}
       </div>
     </section>
   );

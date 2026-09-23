@@ -3,15 +3,24 @@ import { useNavigate } from "react-router-dom";
 
 import Navbar from "../../components/Navbar/Navbar";
 import Footer from "../../components/Footer/Footer";
-import products from "../../data/products";
+import {
+  GridSkeleton,
+  ErrorState,
+} from "../../components/ProductStates/ProductStates";
+import useProducts from "../../hooks/useProducts";
 
 import "./BestSellersPage.css";
 
 function BestSellersPage() {
   const navigate = useNavigate();
 
-  // Sirf wo products jinki isBestSeller flag true hai.
-  const bestSellerProducts = products.filter((product) => product.isBestSeller);
+  // Sirf wo products jinki isBestSeller flag true hai — ab server filter karta hai.
+  const {
+    products: bestSellerProducts,
+    loading,
+    error,
+    retry,
+  } = useProducts({ is_best_seller: true, page_size: 96 });
 
   const handleCardClick = (id) => {
     navigate(`/product/${id}`);
@@ -25,7 +34,11 @@ function BestSellersPage() {
           Best <span className="best-sellers-page-title-italic">Sellers</span>
         </h1>
 
-        {bestSellerProducts.length === 0 ? (
+        {loading ? (
+          <GridSkeleton className="best-sellers-page-grid" count={8} />
+        ) : error ? (
+          <ErrorState onRetry={retry} />
+        ) : bestSellerProducts.length === 0 ? (
           <p className="best-sellers-page-empty">No products found.</p>
         ) : (
           <div className="best-sellers-page-grid">

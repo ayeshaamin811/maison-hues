@@ -1,0 +1,87 @@
+/* ============================================================
+   Loading / error states for product listings.
+   Kept in its own file so no existing component CSS had to change.
+   The 3/4 ratio and #ece8e2 fill match the real product cards on
+   CollectionPage, BestSellersPage and both carousels.
+   ============================================================ */
+
+.ps-card {
+  display: flex;
+  flex-direction: column;
+}
+
+.ps-block,
+.ps-line {
+  background-color: #ece8e2;
+  background-image: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.65) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  background-size: 200% 100%;
+  background-repeat: no-repeat;
+  animation: ps-shimmer 1.4s ease-in-out infinite;
+}
+
+.ps-block {
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  border-radius: 2px;
+}
+
+.ps-line {
+  height: 12px;
+  margin-top: 10px;
+  border-radius: 2px;
+}
+
+.ps-line-short {
+  width: 40%;
+}
+
+@keyframes ps-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* Respect users who have asked for less motion. */
+@media (prefers-reduced-motion: reduce) {
+  .ps-block,
+  .ps-line {
+    animation: none;
+  }
+}
+
+/* ---------------- Error state ---------------- */
+
+.ps-error {
+  padding: 48px 16px;
+  text-align: center;
+}
+
+.ps-error-text {
+  margin: 0 0 16px;
+  font-size: 15px;
+  color: #444;
+}
+
+.ps-retry-btn {
+  padding: 10px 24px;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  background: transparent;
+  border: 1px solid #222;
+  color: #222;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.ps-retry-btn:hover {
+  background: #222;
+  color: #fff;
+}

@@ -1,10 +1,11 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { useParams, Link } from "react-router-dom";
 
 import Navbar from "../../components/Navbar/Navbar";
 import Footer from "../../components/Footer/Footer";
 
-import products from "../../data/products";
+import useProduct from "../../hooks/useProduct";
+import { ErrorState } from "../../components/ProductStates/ProductStates";
 import CartContext from "../../context/CartContext";
 import WishlistContext from "../../context/WishlistContext";
 
@@ -100,16 +101,37 @@ const sizeMeasurements = {
 // CM ko approximate INCH mein convert karne ka helper.
 const cmToInch = (cm) => (cm / 2.54).toFixed(0);
 
+// Loading placeholder. Page ke apne layout classes reuse karta hai taake
+// gallery aur info panel wahi jagah lein jo asli content leta hai.
+function ProductDetailSkeleton() {
+  return (
+    <section className="product-page w-full" aria-busy="true">
+      <div className="product-page-container flex">
+        <div className="product-gallery">
+          <div className="ps-block" />
+          <div className="ps-block" />
+        </div>
+        <div className="product-info-panel">
+          <div className="ps-line" />
+          <div className="ps-line ps-line-short" />
+          <div className="ps-line" />
+          <div className="ps-line" />
+          <div className="ps-line ps-line-short" />
+        </div>
+      </div>
+    </section>
+  );
+}
+
 export default function ProductPage() {
   const { id } = useParams();
 
-  // Abhi static array se product dhoondh rahe hain.
-  // Baad mein yahan API call hogi, jaise: fetch(`/api/products/${id}`)
-  const product = products.find((p) => p.id === Number(id));
+  // Product ab API se aata hai: GET /api/products/<id>/
+  const { product, loading, error, notFound, retry } = useProduct(id);
 
-  const [selectedSize, setSelectedSize] = useState(
-    product ? product.sizes[product.sizes.length - 1] : ""
-  );
+  // Ye states khali shuru hoti hain kyunki pehle render par product abhi
+  // aaya nahi hota. Data aate hi neeche wala useEffect inhein bhar deta hai.
+  const [selectedSize, setSelectedSize] = useState("");
   const [quantity, setQuantity] = useState(1);
   const [showDetails, setShowDetails] = useState(false);
   const [isCustomSize, setIsCustomSize] = useState(false);
@@ -117,9 +139,7 @@ export default function ProductPage() {
 
   // Size Guide popup ka open/close state, aur usme currently selected size tab.
   const [showSizeGuide, setShowSizeGuide] = useState(false);
-  const [guideSize, setGuideSize] = useState(
-    product ? product.sizes[0] : "S"
-  );
+  const [guideSize, setGuideSize] = useState("");
 
   // Get the addToCart function from the global cart context.
   const { addToCart } = useContext(CartContext);
@@ -129,7 +149,44 @@ export default function ProductPage() {
   // heart should be shown filled (already saved) or as an outline.
   const { toggleWishlist, isInWishlist } = useContext(WishlistContext);
 
-  if (!product) {
+  // Jab product load ho jaye to wahi defaults set karo jo pehle static data
+  // ke saath the: aakhri size selected, size guide pehle size par.
+  useEffect(() => {
+    if (!product?.sizes?.length) return;
+
+    setSelectedSize(product.sizes[product.sizes.length - 1]);
+    setGuideSize(product.sizes[0]);
+    setIsCustomSize(false);
+    setCustomSize("");
+    setQuantity(1);
+  }, [product]);
+
+  if (loading) {
+    return (
+      <>
+        <Navbar />
+        <ProductDetailSkeleton />
+        <Footer />
+      </>
+    );
+  }
+
+  // Request hi fail hui (backend band, network error) — retry dikhao.
+  if (error) {
+    return (
+      <>
+        <Navbar />
+        <ErrorState
+          message="Sorry, we couldn't load this product."
+          onRetry={retry}
+        />
+        <Footer />
+      </>
+    );
+  }
+
+  // 404 ya deactivated product — pehle wali not-found screen.
+  if (notFound || !product) {
     return (
       <>
         <Navbar />

@@ -52,6 +52,7 @@ function App() {
             <Route path="/wishlist" element={<WishlistPage />} />
             {/* Main Menu collection URLs redirect to the shared /collection/:categoryName route
                 so CollectionPage always receives categoryName via useParams() */}
+            <Route path="/best-sellers" element={<Navigate to="/collection/best-sellers" replace />} />
             <Route path="/new-arrivals" element={<Navigate to="/collection/new-arrivals" replace />} />
             <Route path="/formal-edit" element={<Navigate to="/collection/formal-edit" replace />} />
             <Route path="/co-ordsets" element={<Navigate to="/collection/co-ordsets" replace />} />
