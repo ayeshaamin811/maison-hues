@@ -4,8 +4,7 @@ import { useParams, Link } from "react-router-dom";
 import Navbar from "../../components/Navbar/Navbar";
 import Footer from "../../components/Footer/Footer";
 
-import useProduct from "../../hooks/useProduct";
-import { ErrorState } from "../../components/ProductStates/ProductStates";
+import products from "../../data/products";
 import CartContext from "../../context/CartContext";
 import WishlistContext from "../../context/WishlistContext";
 
@@ -101,36 +100,14 @@ const sizeMeasurements = {
 // CM ko approximate INCH mein convert karne ka helper.
 const cmToInch = (cm) => (cm / 2.54).toFixed(0);
 
-// Loading placeholder. Page ke apne layout classes reuse karta hai taake
-// gallery aur info panel wahi jagah lein jo asli content leta hai.
-function ProductDetailSkeleton() {
-  return (
-    <section className="product-page w-full" aria-busy="true">
-      <div className="product-page-container flex">
-        <div className="product-gallery">
-          <div className="ps-block" />
-          <div className="ps-block" />
-        </div>
-        <div className="product-info-panel">
-          <div className="ps-line" />
-          <div className="ps-line ps-line-short" />
-          <div className="ps-line" />
-          <div className="ps-line" />
-          <div className="ps-line ps-line-short" />
-        </div>
-      </div>
-    </section>
-  );
-}
-
 export default function ProductPage() {
   const { id } = useParams();
 
-  // Product ab API se aata hai: GET /api/products/<id>/
-  const { product, loading, error, notFound, retry } = useProduct(id);
+  // Product ab static data file se milta hai (id ke hisaab se).
+  const product = products.find((p) => p.id === Number(id));
 
-  // Ye states khali shuru hoti hain kyunki pehle render par product abhi
-  // aaya nahi hota. Data aate hi neeche wala useEffect inhein bhar deta hai.
+  // Ye states khali shuru hoti hain; product milte hi neeche wala useEffect
+  // inhein defaults (aakhri size, pehla size guide tab) se bhar deta hai.
   const [selectedSize, setSelectedSize] = useState("");
   const [quantity, setQuantity] = useState(1);
   const [showDetails, setShowDetails] = useState(false);
@@ -161,32 +138,7 @@ export default function ProductPage() {
     setQuantity(1);
   }, [product]);
 
-  if (loading) {
-    return (
-      <>
-        <Navbar />
-        <ProductDetailSkeleton />
-        <Footer />
-      </>
-    );
-  }
-
-  // Request hi fail hui (backend band, network error) — retry dikhao.
-  if (error) {
-    return (
-      <>
-        <Navbar />
-        <ErrorState
-          message="Sorry, we couldn't load this product."
-          onRetry={retry}
-        />
-        <Footer />
-      </>
-    );
-  }
-
-  // 404 ya deactivated product — pehle wali not-found screen.
-  if (notFound || !product) {
+  if (!product) {
     return (
       <>
         <Navbar />

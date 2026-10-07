@@ -2,19 +2,6 @@ import React, { useState } from "react";
 import "./Contactpage.css";
 import Navbar from './../../components/Navbar/Navbar';
 import Footer from './../../components/Footer/Footer';
-import {
-  submitContact,
-  isValidationError,
-  isRateLimited,
-} from "../../lib/api";
-
-// Shown when the request never reached the server, or failed in a way the
-// contract does not describe. Anything the API *does* say is shown verbatim.
-const GENERIC_ERROR = "Something went wrong. Please try again.";
-
-// The only keys that get their own message under an input. Anything else the
-// server sends back is folded into the banner so it cannot be swallowed.
-const FORM_FIELDS = ["firstName", "lastName", "email", "message"];
 
 function ContactPage() {
   // Basic state for form fields
@@ -23,12 +10,10 @@ function ContactPage() {
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
 
-  // Per-field messages from a 400, keyed by the camelCase name we sent.
+  // Per-field local messages (only the required-email check is done client-side).
   const [fieldErrors, setFieldErrors] = useState({});
-  // Form-level notice: the 201 message, a 429 throttle notice, or a failure.
+  // Form-level notice: a success message after the form is submitted locally.
   const [banner, setBanner] = useState(null); // { type: "success" | "error", text }
-  // True while a request is in flight — blocks a second submit.
-  const [submitting, setSubmitting] = useState(false);
 
   // Drops a field's error the moment the user edits it, so a stale message
   // never sits under an input the user has already fixed.
@@ -42,65 +27,30 @@ function ContactPage() {
     });
   };
 
-  // Renders the first message for a field, if the server sent one.
+  // Renders the first message for a field, if there is one.
   const errorFor = (field) => fieldErrors[field]?.[0];
 
-  // Handles form submit
-  const handleSubmit = async (e) => {
+  // Handles form submit — no backend involved for now.
+  const handleSubmit = (e) => {
     e.preventDefault();
-    if (submitting) return;
 
-    // The only check done here. Everything else — address format, length
-    // limits — is the server's call, so the two cannot drift apart.
+    // Keep the existing local email check.
     if (!email.trim()) {
       setBanner(null);
       setFieldErrors({ email: ["Please enter your email address."] });
       return;
     }
 
-    setSubmitting(true);
-    setBanner(null);
     setFieldErrors({});
+    setBanner({ type: "success", text: "Thank you, we'll get back to you soon." });
 
-    try {
-      const data = await submitContact({ firstName, lastName, email, message });
+    // Reset the form after a successful submit.
+    setFirstName("");
+    setLastName("");
+    setEmail("");
+    setMessage("");
 
-      // Use the server's wording rather than our own copy of it.
-      setBanner({ type: "success", text: data?.message || "Message sent." });
-      setFirstName("");
-      setLastName("");
-      setEmail("");
-      setMessage("");
-    } catch (error) {
-      if (isValidationError(error)) {
-        const errors = error.response?.data?.errors;
-
-        if (errors && typeof errors === "object") {
-          setFieldErrors(errors);
-
-          // Keys that have no input of their own still need to be visible.
-          const stray = Object.keys(errors)
-            .filter((key) => !FORM_FIELDS.includes(key))
-            .map((key) => errors[key]?.[0])
-            .filter(Boolean);
-
-          if (stray.length) setBanner({ type: "error", text: stray.join(" ") });
-        } else {
-          setBanner({ type: "error", text: GENERIC_ERROR });
-        }
-      } else if (isRateLimited(error)) {
-        // Not a per-field problem, so it belongs above the form.
-        setBanner({
-          type: "error",
-          text: error.response?.data?.detail || GENERIC_ERROR,
-        });
-      } else {
-        // No response at all (network failure), or an unexpected status.
-        setBanner({ type: "error", text: GENERIC_ERROR });
-      }
-    } finally {
-      setSubmitting(false);
-    }
+    // TODO: connect to backend/email service when re-enabled.
   };
 
   return (
@@ -142,8 +92,8 @@ function ContactPage() {
         </section>
 
         {/* Contact Form Section */}
-        {/* noValidate: the server owns validation, so its messages are the ones
-            the user sees instead of the browser's built-in bubble. */}
+        {/* noValidate: validation is done locally (on submit) so we control
+            the messages shown instead of the browser's built-in bubbles. */}
         <form className="contact-form" onSubmit={handleSubmit} noValidate>
           {/* Form-level notice — success, rate limit, or a failed request */}
           {banner && (
@@ -220,10 +170,9 @@ function ContactPage() {
             )}
           </div>
 
-          {/* Submit button — disabled in flight so a double-click cannot
-              spend two of the five hourly submissions. */}
-          <button type="submit" className="theme-btn" disabled={submitting}>
-            {submitting ? "Sending..." : "Send Message"}
+          {/* Submit button */}
+          <button type="submit" className="theme-btn">
+            Send Message
           </button>
         </form>
       </div>
