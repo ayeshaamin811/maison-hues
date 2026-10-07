@@ -3,11 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 
 import Navbar from "../../components/Navbar/Navbar";
 import Footer from "../../components/Footer/Footer";
-import {
-  GridSkeleton,
-  ErrorState,
-} from "../../components/ProductStates/ProductStates";
-import useProducts from "../../hooks/useProducts";
+import products from "../../data/products";
 
 import "./CollectionPage.css";
 
@@ -31,20 +27,13 @@ function CollectionPage() {
   const { categoryName } = useParams();
   const navigate = useNavigate();
 
-  // Sirf usi category ke products maangna jo URL mein aayi hai.
-  // ?category= server par collection / edit / fabric teenon se match karta hai,
-  // yani wahi kaam jo pehle product.category.includes() kar raha tha.
-  const query =
+  // Static data se sirf usi category / flag ke products nikalna jis URL mein aayi hai.
+  const filteredProducts =
     categoryName === "best-sellers"
-      ? { is_best_seller: true, page_size: 96 }
-      : { category: categoryName, page_size: 96 };
-
-  const {
-    products: filteredProducts,
-    loading,
-    error,
-    retry,
-  } = useProducts(query);
+      ? products.filter((p) => p.isBestSeller === true)
+      : products.filter(
+          (p) => Array.isArray(p.category) && p.category.includes(categoryName)
+        );
 
   // Agar mapping mein title na mile (unknown category), fallback title.
   const titleParts = categoryTitles[categoryName] || {
@@ -69,11 +58,7 @@ function CollectionPage() {
           {titleParts.suffix}
         </h1>
 
-        {loading ? (
-          <GridSkeleton className="collection-page-grid" count={8} />
-        ) : error ? (
-          <ErrorState onRetry={retry} />
-        ) : filteredProducts.length === 0 ? (
+        {filteredProducts.length === 0 ? (
           <p className="collection-page-empty">No products found.</p>
         ) : (
           <div className="collection-page-grid">

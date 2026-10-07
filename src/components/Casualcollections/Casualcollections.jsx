@@ -6,12 +6,8 @@ import { Navigation } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/navigation";
 
-// Product data ab Django API se aa raha hai
-import useProducts from "../../hooks/useProducts";
-import {
-  CardSkeleton,
-  ErrorState,
-} from "../ProductStates/ProductStates";
+// Product data (static file se aa raha hai)
+import products from "../../data/products";
 
 // Our own custom CSS (colors, fonts, hover effects, media queries)
 import "./Casualcollections.css";
@@ -102,13 +98,10 @@ export default function CasualCollections() {
   const nextRef = useRef(null);
   const navigate = useNavigate();
 
-  // Sirf "casual" collection ke products — pehle yahan saare products aa rahe the.
-  const {
-    products: casualProducts,
-    loading,
-    error,
-    retry,
-  } = useProducts({ collection: "casual", page_size: 96 });
+  // Static data se sirf "casual" collection ke products.
+  const casualProducts = products.filter((p) =>
+    Array.isArray(p.category) && p.category.includes("casual")
+  );
 
   const handleCardClick = (id) => {
     navigate(`/product/${id}`);
@@ -147,45 +140,32 @@ export default function CasualCollections() {
         </div>
 
         {/* Swiper slider showing all product cards */}
-        {error ? (
-          <ErrorState onRetry={retry} />
-        ) : (
-          <Swiper
-            modules={[Navigation]}
-            spaceBetween={20}
-            slidesPerView={4}
-            onBeforeInit={(swiper) => {
-              swiper.params.navigation.prevEl = prevRef.current;
-              swiper.params.navigation.nextEl = nextRef.current;
-            }}
-            navigation={{
-              prevEl: prevRef.current,
-              nextEl: nextRef.current,
-            }}
-            breakpoints={{
-              0: { slidesPerView: 1, spaceBetween: 14 },
-              640: { slidesPerView: 2, spaceBetween: 16 },
-              1024: { slidesPerView: 3, spaceBetween: 18 },
-              1280: { slidesPerView: 4, spaceBetween: 20 },
-            }}
-            className="casual-swiper"
-            // Skeleton se asli slides par jaate waqt Swiper ko dobara
-            // init karwata hai, warna slide count aur arrows stale reh sakte hain.
-            key={loading ? "loading" : "loaded"}
-          >
-            {loading
-              ? Array.from({ length: 4 }, (_, index) => (
-                  <SwiperSlide key={`skeleton-${index}`}>
-                    <CardSkeleton />
-                  </SwiperSlide>
-                ))
-              : casualProducts.map((product) => (
-                  <SwiperSlide key={product.id}>
-                    <ProductCard product={product} onCardClick={handleCardClick} />
-                  </SwiperSlide>
-                ))}
-          </Swiper>
-        )}
+        <Swiper
+          modules={[Navigation]}
+          spaceBetween={20}
+          slidesPerView={4}
+          onBeforeInit={(swiper) => {
+            swiper.params.navigation.prevEl = prevRef.current;
+            swiper.params.navigation.nextEl = nextRef.current;
+          }}
+          navigation={{
+            prevEl: prevRef.current,
+            nextEl: nextRef.current,
+          }}
+          breakpoints={{
+            0: { slidesPerView: 1, spaceBetween: 14 },
+            640: { slidesPerView: 2, spaceBetween: 16 },
+            1024: { slidesPerView: 3, spaceBetween: 18 },
+            1280: { slidesPerView: 4, spaceBetween: 20 },
+          }}
+          className="casual-swiper"
+        >
+          {casualProducts.map((product) => (
+            <SwiperSlide key={product.id}>
+              <ProductCard product={product} onCardClick={handleCardClick} />
+            </SwiperSlide>
+          ))}
+        </Swiper>
       </div>
     </section>
   );
